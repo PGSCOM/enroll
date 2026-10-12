@@ -59,27 +59,10 @@ impl cosmic::Application for AppModel {
         // Start with navigation closed
         core.nav_bar_toggle();
 
-        let about = About::default()
-            .name(fl!("app-title"))
-            .icon(icon::from_name(Self::APP_ID))
-            .version(env!("CARGO_PKG_VERSION"))
-            .author("Joonas Tuomi")
-            .comments(fl!("welcome"))
-            .license(env!("CARGO_PKG_LICENSE"))
-            .license_url("https://spdx.org/licenses/MPL-2.0")
-            .developers([("Joonas Tuomi", "github@joonastuomi.fi")])
-            .links([
-                (fl!("repository"), "https://github.com/cosmic-utils/enroll"),
-                (
-                    fl!("support"),
-                    "https://github.com/cosmic-utils/enroll/issues",
-                ),
-            ]);
-
         let mut app = AppModel {
             core,
             context_page: ContextPage::default(),
-            about,
+            about: about(Self::APP_ID),
             nav: nav_bar::Model::default(),
             theme: theme_button_model(),
             key_binds: super::default_key_binds(),
@@ -358,4 +341,34 @@ impl cosmic::Application for AppModel {
 
         Task::batch(vec![self.update_title_task(), self.list_fingers_task()])
     }
+}
+
+fn about(icon_name: &str) -> About {
+    About::default()
+        .name(fl!("app-title"))
+        .icon(icon::from_name(icon_name))
+        .version(env!("CARGO_PKG_VERSION"))
+        .author("Joonas Tuomi")
+        .translators([
+            ("Luna \"bittin\" Jernberg", "bittin@reimu.nl"),
+            ("David Carvalho", "david.snt.carvalho@gmail.com"),
+            ("Geeson \"Gerseneck\" Wan", "wang14240@gmail.com"),
+            ("Albano Battistella", ""),
+            ("lorduskordus", "lorduskordus@gmail.com"),
+            ("therealmate", "hellogaming91@gmail.com"),
+            ("VandaLHJ", "vandalhj@gmail.com"),
+            ("Димко", "Dymkovych@proton.me"),
+        ])
+        .designers([("KodeBarista", ""), ("Hojjat Abdollahi", "")])
+        .comments(fl!("welcome"))
+        .license(env!("CARGO_PKG_LICENSE"))
+        .license_url("https://spdx.org/licenses/MPL-2.0")
+        .developers([("Joonas Tuomi", "github@joonastuomi.fi")])
+        .links([
+            (fl!("repository"), "https://github.com/cosmic-utils/enroll"),
+            (
+                fl!("support"),
+                "https://github.com/cosmic-utils/enroll/issues",
+            ),
+        ])
 }
