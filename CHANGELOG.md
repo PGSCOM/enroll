@@ -10,6 +10,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 ### Changed
 
 - Updated Ukrainian translation by @Dymkom
+- Designers and translators listed in About page 
 
 ## [1.2.8](https://github.com/cosmic-utils/enroll/releases/tag/v1.2.8) - 2026-09-25
 
