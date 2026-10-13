@@ -18,7 +18,7 @@
 %global __provides_exclude_from ^%{_libdir}/%{name}/.*$
 
 Name:           cosmic-utils-enroll
-Version:        1.2.8
+Version:        1.2.9
 Release:        1%{?dist}
 Summary:        GUI for fprintd fingerprint enrolling (COSMIC)
 
@@ -78,6 +78,10 @@ just rootdir=%{buildroot} install
 %{_datadir}/icons/hicolor/scalable/apps/%{appid}.svg
 
 %changelog
+* Tue Oct 13 2026 Joonas Tuomi <git@joonastuomi.fi> - 1.2.9-1
+- Updated Ukrainian translation by @Dymkom
+- Designers and translators listed in About page
+
 * Fri Sep 25 2026 Joonas Tuomi <git@joonastuomi.fi> - 1.2.8-1
 - Settings UI polished.
 - Cancel keyboard shortcut moved to Ctrl + C and works on anything cancellable.
