@@ -529,7 +529,7 @@ impl AppModel {
         &mut self,
         is_dark: bool,
     ) -> Task<cosmic::Action<Message>> {
-        use crate::config::AppTheme;
+        self.portal_is_dark = is_dark;
 
         // Only apply if user wants to follow system theme
         if self.config.app_theme != AppTheme::System {
@@ -538,11 +538,7 @@ impl AppModel {
 
         info!(is_dark, "Portal color scheme changed, updating theme");
 
-        command::set_theme(if is_dark {
-            cosmic::Theme::dark()
-        } else {
-            cosmic::Theme::light()
-        })
+        command::set_theme(AppTheme::System.theme(is_dark))
     }
 
     pub fn on_theme_setting(
@@ -565,7 +561,7 @@ impl AppModel {
             tracing::error!("failed to write config: {}", err);
         }
 
-        cosmic::command::set_theme(self.config.app_theme.theme())
+        cosmic::command::set_theme(self.config.app_theme.theme(self.portal_is_dark))
     }
 
     /// Selects a finger by numeric key (1-0).

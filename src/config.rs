@@ -1,7 +1,9 @@
 // SPDX-License-Identifier: MPL-2.0
+use ashpd::desktop::settings::{ColorScheme, Settings};
 use cosmic::cosmic_config::{self, CosmicConfigEntry, cosmic_config_derive::CosmicConfigEntry};
 use cosmic::{Theme, theme};
 use serde::{Deserialize, Serialize};
+use std::time::Duration;
 use tracing::error;
 
 // AppTheme is directly copied from https://github.com/cosmic-utils/camera
@@ -21,10 +23,9 @@ impl AppTheme {
     /// Get the COSMIC theme for this app theme preference.
     ///
     /// On non-COSMIC desktops, `system_dark()`/`system_light()`/`system_preference()`
-    /// read broken defaults from cosmic_config, so we use built-in themes instead.
-    /// For `System` mode, the initial theme defaults to dark; the portal subscription
-    /// in `mod.rs` sends the correct value asynchronously once connected.
-    pub fn theme(&self) -> Theme {
+    /// read broken defaults from cosmic_config, so we use built-in themes instead,
+    /// following `portal_is_dark` in `System` mode.
+    pub fn theme(&self, portal_is_dark: bool) -> Theme {
         if is_cosmic_desktop() {
             match self {
                 Self::Dark => {
@@ -40,9 +41,15 @@ impl AppTheme {
                 Self::System => theme::system_preference(),
             }
         } else {
-            match self {
-                Self::Dark | Self::System => Theme::dark(),
-                Self::Light => Theme::light(),
+            let is_dark = match self {
+                Self::System => portal_is_dark,
+                Self::Dark => true,
+                Self::Light => false,
+            };
+            if is_dark {
+                Theme::dark()
+            } else {
+                Theme::light()
             }
         }
     }
@@ -63,6 +70,39 @@ pub fn is_cosmic_desktop() -> bool {
             .unwrap_or(false)
     });
     *IS_COSMIC
+}
+
+/// Whether the XDG portal color scheme is dark.
+///
+/// `NoPreference` counts as light, as it is what light desktops report by default (e.g. GNOME).
+pub fn is_dark_scheme(scheme: ColorScheme) -> bool {
+    scheme == ColorScheme::PreferDark
+}
+
+/// Reads the XDG portal color scheme, blocking for at most one second.
+///
+/// Must be called outside of an async runtime.
+pub fn read_portal_is_dark() -> bool {
+    let Ok(runtime) = tokio::runtime::Builder::new_current_thread()
+        .enable_all()
+        .build()
+    else {
+        return false;
+    };
+    runtime.block_on(async {
+        // Own connection: ashpd's shared one would die with this runtime
+        let read = async {
+            let connection = zbus::Connection::session().await?;
+            Settings::with_connection(connection)
+                .await?
+                .color_scheme()
+                .await
+        };
+        matches!(
+            tokio::time::timeout(Duration::from_secs(1), read).await,
+            Ok(Ok(scheme)) if is_dark_scheme(scheme)
+        )
+    })
 }
 
 /// Attempts to read current version of a COSMIC Config or create one

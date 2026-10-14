@@ -49,6 +49,8 @@ pub struct AppModel {
     config: Config,
     // Config handler for writing & reading it
     config_handler: Option<cosmic_config::Config>,
+    // Whether the XDG portal color scheme is dark (non-COSMIC desktops only)
+    portal_is_dark: bool,
     // Status text for the UI
     status: String,
     // Currently selected device path

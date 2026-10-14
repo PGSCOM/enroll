@@ -32,7 +32,7 @@ impl cosmic::Application for AppModel {
     type Executor = cosmic::executor::Default;
 
     /// Data that your application receives to its init method.
-    type Flags = ();
+    type Flags = bool;
 
     /// Messages which the application and its widgets will emit.
     type Message = Message;
@@ -51,7 +51,7 @@ impl cosmic::Application for AppModel {
     /// Initializes the application with any given flags and startup commands.
     fn init(
         mut core: cosmic::Core,
-        _flags: Self::Flags,
+        portal_is_dark: Self::Flags,
     ) -> (Self, Task<cosmic::Action<Self::Message>>) {
         // Load configuration
         let (config_handler, config) = read_config(Self::APP_ID);
@@ -68,6 +68,7 @@ impl cosmic::Application for AppModel {
             key_binds: super::default_key_binds(),
             config,
             config_handler,
+            portal_is_dark,
             status: fl!("status-connecting"),
             device_path: None,
             devices: Vec::new(),
@@ -87,7 +88,8 @@ impl cosmic::Application for AppModel {
             confirm_delete_all: false,
         };
 
-        let start_theme = cosmic::command::set_theme(app.config.app_theme.theme());
+        let start_theme =
+            cosmic::command::set_theme(app.config.app_theme.theme(app.portal_is_dark));
         let command = app.update_title_task();
         let connect_task = task_connect();
         let users_task = task_load_users();
@@ -275,7 +277,7 @@ impl cosmic::Application for AppModel {
             subscriptions.push(verify_subscription(data));
         }
 
-        subscriptions.push(portal_theme_subscription(self.config.app_theme));
+        subscriptions.push(portal_theme_subscription());
 
         subscriptions.push(key_subscription());
 

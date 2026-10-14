@@ -23,6 +23,8 @@ fn main() -> cosmic::iced::Result {
             .min_height(WINDOW_MIN_HEIGHT),
     );
 
-    // Starts the application's event loop with `()` as the application's flags.
-    cosmic::app::run::<app::AppModel>(settings, ())
+    let portal_is_dark = !config::is_cosmic_desktop() && config::read_portal_is_dark();
+
+    // Starts the application's event loop with the portal color scheme as flags.
+    cosmic::app::run::<app::AppModel>(settings, portal_is_dark)
 }

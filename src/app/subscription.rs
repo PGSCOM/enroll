@@ -129,9 +129,9 @@ pub(crate) fn verify_subscription(data: VerifyData) -> Subscription<Message> {
 /// so theme updates when user changes their desktop appearance
 ///
 /// **Returns** subscription to ColorScheme changes or None
-pub fn portal_theme_subscription(app_theme: crate::config::AppTheme) -> Subscription<Message> {
-    if !crate::config::is_cosmic_desktop() && app_theme == crate::config::AppTheme::System {
-        Subscription::run_with(app_theme, |_| {
+pub fn portal_theme_subscription() -> Subscription<Message> {
+    if !crate::config::is_cosmic_desktop() {
+        Subscription::run(|| {
             channel(10, async move |mut output: Sender<Message>| {
                 let Ok(settings) = Settings::new().await else {
                     tracing::warn!("Failed to create XDG Settings portal proxy");
@@ -142,7 +142,7 @@ pub fn portal_theme_subscription(app_theme: crate::config::AppTheme) -> Subscrip
                 let send_scheme =
                     |output: &mut cosmic::iced::futures::channel::mpsc::Sender<Message>,
                      scheme: ColorScheme| {
-                        let is_dark = !matches!(scheme, ColorScheme::PreferLight);
+                        let is_dark = crate::config::is_dark_scheme(scheme);
                         output.try_send(Message::ThemeChanged(is_dark)).ok();
                     };
 
