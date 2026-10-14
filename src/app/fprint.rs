@@ -2,7 +2,7 @@
 
 use crate::app::error::AppError;
 use crate::app::message::Message;
-use crate::fprint_dbus::{DeviceProxy, ManagerProxy};
+use crate::fprint_dbus::{DeviceProxy, ManagerProxy, SystemdManagerProxy, SystemdUnitProxy};
 use futures_util::sink::Sink;
 use futures_util::{SinkExt, StreamExt};
 
@@ -343,6 +343,31 @@ where
     }
 
     device.release().await
+}
+
+/// fprintd has no API to take a device away from the client that claimed it,
+/// but it drops every claim when it exits. Restarts whichever systemd unit owns
+/// the fprintd bus name, so it works for fprintd and open-fprintd alike.
+///
+/// # Errors
+/// ***org.freedesktop.DBus.Error.AccessDenied:***
+/// if the user did not authorize the restart
+pub async fn restart_fprint_service(connection: &zbus::Connection) -> zbus::Result<()> {
+    let dbus = zbus::fdo::DBusProxy::new(connection).await?;
+    let pid = dbus
+        .get_connection_unix_process_id(zbus::names::BusName::try_from("net.reactivated.Fprint")?)
+        .await?;
+    let unit_path = SystemdManagerProxy::new(connection)
+        .await?
+        .get_unit_by_pid(pid)
+        .await?;
+    SystemdUnitProxy::builder(connection)
+        .path(unit_path)?
+        .build()
+        .await?
+        .restart("replace")
+        .await?;
+    Ok(())
 }
 
 fn validate_username(username: &str) -> zbus::Result<()> {

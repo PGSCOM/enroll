@@ -216,6 +216,19 @@ pub fn task_find_device(conn_clone: zbus::Connection) -> Task<cosmic::Action<Mes
     )
 }
 
+/// **Returns** ***Task*** which restarts the fingerprint service and searches devices again
+pub fn task_force_release(conn: zbus::Connection) -> Task<cosmic::Action<Message>> {
+    Task::perform(
+        async move {
+            match restart_fprint_service(&conn).await {
+                Ok(_) => Message::ConnectionReady(conn),
+                Err(e) => Message::OperationError(AppError::from(e)),
+            }
+        },
+        cosmic::Action::App,
+    )
+}
+
 /// **Returns** ***Task*** which connects to DBus
 pub fn task_connect() -> Task<cosmic::Action<Message>> {
     Task::perform(

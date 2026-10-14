@@ -17,6 +17,7 @@ finish-args:
   - --system-talk-name=net.reactivated.Fprint
   - --system-talk-name=org.freedesktop.PolicyKit1
   - --system-talk-name=org.freedesktop.Accounts
+  - --system-talk-name=org.freedesktop.systemd1
   - --talk-name=com.system76.CosmicSettingsDaemon
   - --talk-name=com.system76.CosmicSettingsDaemon.*
 

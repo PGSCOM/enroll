@@ -85,6 +85,7 @@ impl cosmic::Application for AppModel {
             confirm_delete: false,
             confirm_clear: false,
             confirm_delete_all: false,
+            confirm_force_release: false,
         };
 
         let start_theme = cosmic::command::set_theme(app.config.app_theme.theme());
@@ -186,6 +187,21 @@ impl cosmic::Application for AppModel {
                     )
                     .secondary_action(
                         widget::button::standard(fl!("cancel")).on_press(Message::CancelDeleteAll),
+                    )
+                    .into(),
+            )
+        } else if self.confirm_force_release {
+            Some(
+                dialog::dialog()
+                    .title(fl!("force-release"))
+                    .body(fl!("force-release-confirm"))
+                    .primary_action(
+                        widget::button::destructive(fl!("force-release"))
+                            .on_press(Message::ForceRelease),
+                    )
+                    .secondary_action(
+                        widget::button::standard(fl!("cancel"))
+                            .on_press(Message::CancelForceRelease),
                     )
                     .into(),
             )
@@ -302,6 +318,8 @@ impl cosmic::Application for AppModel {
             Message::DeleteSingleUnsupported => self.on_delete_single_unsupported(),
             Message::ConfirmDeleteAll => self.on_confirm_delete_all(),
             Message::CancelDeleteAll => self.on_cancel_delete_all(),
+            Message::ForceRelease => self.on_force_release(),
+            Message::CancelForceRelease => self.on_cancel_force_release(),
             Message::ClearDevice => self.on_clear_device(),
             Message::CancelClear => self.on_cancel_clear(),
             Message::ClearComplete(res) => self.on_clear_completion(res),

@@ -49,7 +49,8 @@ impl From<zbus::Error> for AppError {
     fn from(err: zbus::Error) -> Self {
         if let zbus::Error::MethodError(name, _, _) = &err {
             match name.as_str() {
-                "net.reactivated.Fprint.Error.PermissionDenied" => AppError::PermissionDenied,
+                "net.reactivated.Fprint.Error.PermissionDenied"
+                | "org.freedesktop.DBus.Error.AccessDenied" => AppError::PermissionDenied,
                 "net.reactivated.Fprint.Error.AlreadyInUse" => AppError::AlreadyInUse,
                 "net.reactivated.Fprint.Error.Internal" => AppError::Internal,
                 "net.reactivated.Fprint.Error.NoEnrolledPrints" => AppError::NoEnrolledPrints,
@@ -92,6 +93,10 @@ mod tests {
         let test_cases = vec![
             (
                 "net.reactivated.Fprint.Error.PermissionDenied",
+                AppError::PermissionDenied,
+            ),
+            (
+                "org.freedesktop.DBus.Error.AccessDenied",
                 AppError::PermissionDenied,
             ),
             (

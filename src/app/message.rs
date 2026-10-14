@@ -44,6 +44,8 @@ pub enum Message {
     DeleteSingleUnsupported,
     ConfirmDeleteAll,
     CancelDeleteAll,
+    ForceRelease,
+    CancelForceRelease,
     ClearDevice,
     CancelClear,
     ClearComplete(Result<(), AppError>),
@@ -86,6 +88,8 @@ impl AppModel {
             return self.on_cancel();
         } else if self.confirm_delete_all {
             return self.on_cancel_delete_all();
+        } else if self.confirm_force_release {
+            return self.on_cancel_force_release();
         }
         Task::none()
     }
@@ -176,6 +180,7 @@ impl AppModel {
             self.enrolled_fingers.clear();
             self.status = fl!("success");
         } else {
+            self.confirm_force_release = err == AppError::AlreadyInUse;
             self.status = err.localized_message();
         }
         self.busy = false;
@@ -479,6 +484,28 @@ impl AppModel {
     /// **Returns** ***Task***()
     pub(crate) fn on_cancel_delete_all(&mut self) -> Task<cosmic::Action<Message>> {
         self.confirm_delete_all = false;
+        Task::none()
+    }
+
+    /// Restarts the fingerprint service so another application's claim on the
+    /// device is dropped.
+    ///
+    /// **Returns** ***task_force_release***() or ***Task***::**none**()
+    pub(crate) fn on_force_release(&mut self) -> Task<cosmic::Action<Message>> {
+        self.confirm_force_release = false;
+        if let Some(conn) = self.connection.clone() {
+            self.status = fl!("status-releasing-device");
+            self.busy = true;
+            return task_force_release(conn);
+        }
+        Task::none()
+    }
+
+    /// User chose not to force the device release.
+    ///
+    /// **Returns** ***Task***()
+    pub(crate) fn on_cancel_force_release(&mut self) -> Task<cosmic::Action<Message>> {
+        self.confirm_force_release = false;
         Task::none()
     }
 

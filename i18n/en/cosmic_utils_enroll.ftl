@@ -45,6 +45,12 @@ deleting = Deleting fingerprint…
 delete-all = Delete all
 # Someone using open-fprintd, or other implementation, not supporting deleting a single fingerprint, this dialog and options is given.
 delete-all-fallback = This fingerprint service does not support deleting a single fingerprint. Delete all of this user's fingerprints instead?
+# Button in the dialog shown when another application holds the scanner. It takes the scanner away from that application.
+force-release = Force release
+# Dialog message shown when another application holds the scanner, explaining what forcing the release does.
+force-release-confirm = The device is in use by another application. Forcing the release restarts the fingerprint service and cancels what that application was doing.
+# Status shown while the fingerprint service is being restarted to free the scanner.
+status-releasing-device = Releasing device…
 # This element contains the Delete All button.
 clear-device = Clear Device
 # Dialog message that confirms you really wanted deletion of all prints.

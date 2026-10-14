@@ -42,3 +42,22 @@ pub trait Device {
     #[zbus(property, name = "name")]
     fn name(&self) -> zbus::Result<String>;
 }
+
+#[proxy(
+    interface = "org.freedesktop.systemd1.Manager",
+    default_service = "org.freedesktop.systemd1",
+    default_path = "/org/freedesktop/systemd1"
+)]
+pub trait SystemdManager {
+    #[zbus(name = "GetUnitByPID")]
+    fn get_unit_by_pid(&self, pid: u32) -> zbus::Result<zbus::zvariant::OwnedObjectPath>;
+}
+
+#[proxy(
+    interface = "org.freedesktop.systemd1.Unit",
+    default_service = "org.freedesktop.systemd1"
+)]
+pub trait SystemdUnit {
+    #[zbus(allow_interactive_auth)]
+    fn restart(&self, mode: &str) -> zbus::Result<zbus::zvariant::OwnedObjectPath>;
+}

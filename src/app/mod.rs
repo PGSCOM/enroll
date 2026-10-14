@@ -84,6 +84,8 @@ pub struct AppModel {
     // Confirmation state for falling back to deleting all of a user's prints
     // when single-finger delete is unsupported (e.g. open-fprintd).
     confirm_delete_all: bool,
+    // Offer to force the device away from another application holding it
+    confirm_force_release: bool,
 }
 
 mod application;
