@@ -196,11 +196,15 @@ pub fn task_select_device(
     )
 }
 
-/// **Returns** ***Task*** which finds and returns default fingerprint scanner device
-pub fn task_find_device(conn_clone: zbus::Connection) -> Task<cosmic::Action<Message>> {
+/// **Returns** ***Task*** which finds and returns the preferred fingerprint scanner device,
+/// falling back to the default one if it's not available
+pub fn task_find_device(
+    conn_clone: zbus::Connection,
+    preferred: Option<String>,
+) -> Task<cosmic::Action<Message>> {
     Task::perform(
         async move {
-            match find_device(&conn_clone).await {
+            match find_device(&conn_clone, preferred).await {
                 Ok((path, proxy)) => Message::DeviceFound(Some((path, proxy))),
                 Err(e) => {
                     let error = AppError::from(e);

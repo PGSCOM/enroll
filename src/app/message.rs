@@ -66,8 +66,8 @@ impl AppModel {
     /// This is just a fitter because on_update_configs Message signature was wrong.
     pub(crate) fn on_ui_change(&mut self, state: bool) -> Task<cosmic::Action<Message>> {
         let conf = Config {
-            app_theme: self.config.app_theme,
             experimental_ui: state,
+            ..self.config.clone()
         };
         self.on_update_config(conf)
     }
@@ -145,7 +145,7 @@ impl AppModel {
         let find_conn = conn.clone();
         let devices_conn = conn.clone();
         Task::batch(vec![
-            task_find_device(find_conn),
+            task_find_device(find_conn, self.config.device.clone()),
             get_devices_task(devices_conn),
         ])
     }
@@ -589,9 +589,15 @@ impl AppModel {
         if let Some(device) = self.devices.get(index)
             && let Some(conn) = &self.connection
         {
+            let path = device.path.clone();
+            let select = task_select_device(conn.clone(), path.clone());
             self.status = fl!("status-searching-device");
             self.busy = true;
-            return task_select_device(conn.clone(), device.path.clone());
+            let save = self.on_update_config(Config {
+                device: Some(path.to_string()),
+                ..self.config.clone()
+            });
+            return Task::batch(vec![select, save]);
         }
         Task::none()
     }

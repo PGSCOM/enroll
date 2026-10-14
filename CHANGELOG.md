@@ -5,6 +5,16 @@ All notable changes to this project will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- Remember the selected fingerprint device between launches
+
+### Fixed
+
+- Theme selector in Settings now shows the saved theme on startup
+
 ## [1.2.9](https://github.com/cosmic-utils/enroll/releases/tag/v1.2.9) - 2026-10-13
 
 ### Changed

@@ -53,6 +53,8 @@ impl AppTheme {
 pub struct Config {
     pub app_theme: AppTheme,
     pub experimental_ui: bool,
+    /// DBus path of the last device selected by the user
+    pub device: Option<String>,
 }
 
 /// Whether we're running on the COSMIC desktop (cached for process lifetime).

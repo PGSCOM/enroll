@@ -6,17 +6,30 @@ use crate::fprint_dbus::{DeviceProxy, ManagerProxy};
 use futures_util::sink::Sink;
 use futures_util::{SinkExt, StreamExt};
 
-/// **Returns** the default fingerprint reader device.
+/// **Returns** the preferred fingerprint reader device if it's available,
+/// otherwise the default one.
 /// *device:*
-/// The object path for the default device.
+/// The object path for the device.
 /// # Errors
 /// ***net.reactivated.Fprint.Error.NoSuchDevice:***
 /// if the device does not exist
 pub async fn find_device(
     connection: &zbus::Connection,
+    preferred: Option<String>,
 ) -> zbus::Result<(zbus::zvariant::OwnedObjectPath, DeviceProxy<'static>)> {
     let manager = ManagerProxy::new(connection).await?;
-    let path = manager.get_default_device().await?;
+    let saved = match preferred {
+        Some(preferred) => manager
+            .get_devices()
+            .await?
+            .into_iter()
+            .find(|p| p.as_str() == preferred),
+        None => None,
+    };
+    let path = match saved {
+        Some(path) => path,
+        None => manager.get_default_device().await?,
+    };
     let device = DeviceProxy::builder(connection)
         .path(path.clone())?
         .build()

@@ -203,16 +203,19 @@ pub enum ContextPage {
     Help,
 }
 
-fn theme_button_model() -> segmented_button::SingleSelectModel {
-    segmented_button::SingleSelectModel::builder()
-        .insert(|b| {
-            b.text(fl!("theme-system"))
-                .data(AppTheme::System)
-                .activate()
-        })
+fn theme_button_model(current: AppTheme) -> segmented_button::SingleSelectModel {
+    let mut model = segmented_button::SingleSelectModel::builder()
+        .insert(|b| b.text(fl!("theme-system")).data(AppTheme::System))
         .insert(|b| b.text(fl!("theme-dark")).data(AppTheme::Dark))
         .insert(|b| b.text(fl!("theme-light")).data(AppTheme::Light))
-        .build()
+        .build();
+    let active = model
+        .iter()
+        .find(|&e| model.data::<AppTheme>(e) == Some(&current));
+    if let Some(entity) = active {
+        model.activate(entity);
+    }
+    model
 }
 
 #[cfg(test)]
